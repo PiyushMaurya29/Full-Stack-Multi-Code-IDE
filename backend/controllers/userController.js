@@ -106,6 +106,21 @@ exports.createProj = async (req, res) => {
   try {
 
     let { name, projLanguage, token, version } = req.body;
+        // ✅ Validation
+    if (!name || name.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        msg: "Project name is required"
+      });
+    }
+
+    if (!projLanguage) {
+      return res.status(400).json({
+        success: false,
+        msg: "Project language is required"
+      });
+    }
+
     let decoded = jwt.verify(token, secret);
     let user = await userModel.findOne({ _id: decoded.userId });
 

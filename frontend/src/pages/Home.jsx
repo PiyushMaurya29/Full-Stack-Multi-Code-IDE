@@ -105,28 +105,44 @@ const Home = () => {
   }, []);
 
   const createProj = () => {
-    fetch(api_base_url + "/createProj", {
-      mode: "cors",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name: name,
-        projLanguage: selectedLanguage.value,
-        token: localStorage.getItem("token"),
-        version: selectedLanguage.version
-      })
-    }).then(res => res.json()).then(data => {
+
+  // ✅ 1) Validate Project Name
+  if (!name.trim()) {
+    toast.error("Project name is required!");
+    return;
+  }
+
+  // ✅ 2) Validate Language
+  if (!selectedLanguage) {
+    toast.error("Please select a language!");
+    return;
+  }
+
+  fetch(api_base_url + "/createProj", {
+    mode: "cors",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: name.trim(), // ✅ always send clean name
+      projLanguage: selectedLanguage.value,
+      token: localStorage.getItem("token"),
+      version: selectedLanguage.version
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
       if (data.success) {
         setName("");
-        navigate("/editior/" + data.projectId)
-      }
-      else {
+        setSelectedLanguage(null); // ✅ reset language too
+        navigate("/editior/" + data.projectId);
+      } else {
         toast.error(data.msg);
       }
-    })
-  };
+    });
+};
+
 
   const deleteProject = (id) => {
     let conf = confirm("Are you sure you want to delete this project?");
@@ -187,7 +203,7 @@ const Home = () => {
     <>
       <Navbar />
       <div className="flex items-center px-[100px] justify-between mt-5">
-        <h3 className='text-2xl'>👋 Hi, Mahdi</h3>
+        <h3 className='text-2xl'>👋 Hi, Piyush Maurya</h3>
         <div className="flex items-center">
           <button onClick={() => { setIsCreateModelShow(true) }} className="btnNormal bg-blue-500 transition-all hover:bg-blue-600">Create Project</button>
         </div>
@@ -201,27 +217,45 @@ const Home = () => {
               <div className="project w-full p-[15px] flex items-center justify-between bg-[#0f0e0e]">
                 <div onClick={() => { navigate("/editior/" + project._id) }} className='flex w-full items-center gap-[15px]'>
                   {
-                    project.projLanguage === "python" ?
-                      <>
-                        <img className='w-[130px] h-[100px] object-cover' src="https://images.ctfassets.net/em6l9zw4tzag/oVfiswjNH7DuCb7qGEBPK/b391db3a1d0d3290b96ce7f6aacb32b0/python.png" alt="" />
-                      </>
-                      : project.projLanguage === "javascript" ?
-                        <>
-                          <img className='w-[130px] h-[100px] object-cover' src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="" />
-                        </> : project.projLanguage === "cpp" ?
-                          <>
-                            <img className='w-[130px] h-[100px] object-cover' src="https://upload.wikimedia.org/wikipedia/commons/3/32/C%2B%2B_logo.png" alt="" />
-                          </> : project.projLanguage === "c" ?
-                            <>
-                              <img className='w-[130px] h-[100px] object-cover' src="https://upload.wikimedia.org/wikipedia/commons/1/19/C_Logo.png" alt="" />
-                            </> : project.projLanguage === "java" ?
-                              <>
-                                <img className='w-[130px] h-[100px] object-cover' src="https://static-00.iconduck.com/assets.00/java-icon-1511x2048-6ikx8301.png" alt="" />
-                              </> : project.projLanguage === "bash" ?
-                                <>
-                                  <img className='w-[130px] h-[100px] object-cover' src="https://w7.pngwing.com/pngs/48/567/png-transparent-bash-shell-script-command-line-interface-z-shell-shell-rectangle-logo-commandline-interface-thumbnail.png" alt="" />
-                                </> : ""
-                  }
+  project.projLanguage === "python" ? (
+    <img
+      className="w-[130px] h-[100px] object-cover"
+      src="https://images.ctfassets.net/em6l9zw4tzag/oVfiswjNH7DuCb7qGEBPK/b391db3a1d0d3290b96ce7f6aacb32b0/python.png"
+      alt="python"
+    />
+  ) : project.projLanguage === "javascript" ? (
+    <img
+      className="w-[130px] h-[100px] object-cover"
+      src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png"
+      alt="javascript"
+    />
+  ) : project.projLanguage === "cpp" ? (
+    <img
+      className="w-[130px] h-[100px] object-cover"
+      src="https://upload.wikimedia.org/wikipedia/commons/3/32/C%2B%2B_logo.png"
+      alt="cpp"
+    />
+  ) : project.projLanguage === "c" ? (
+    <img
+      className="w-[130px] h-[100px] object-cover"
+      src="https://upload.wikimedia.org/wikipedia/commons/1/19/C_Logo.png"
+      alt="c"
+    />
+  ) : project.projLanguage === "java" ? (
+    <img
+      className="w-[130px] h-[100px] object-contain"
+      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg"
+      alt="java"
+    />
+  ) : project.projLanguage === "bash" ? (
+    <img
+      className="w-[130px] h-[100px] object-cover"
+      src="https://w7.pngwing.com/pngs/48/567/png-transparent-bash-shell-script-command-line-interface-z-shell-shell-rectangle-logo-commandline-interface-thumbnail.png"
+      alt="bash"
+    />
+  ) : null
+}
+
                   <div>
                     <h3 className='text-xl'>{project.name}</h3>
                     <p className='text-[14px] text-[gray]'>{new Date(project.date).toDateString()}</p>
